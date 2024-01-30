@@ -24,6 +24,8 @@ class EqualizerView {
 
     createTag('audio', ['audio'], this.#root, {
       controls: true,
+      onplay: () => this.#controller.handlePlay(),
+      onpause: () => this.#controller.handlePause(),
     });
     createTag('input', ['input'], this.#root, {
       type: 'file',
