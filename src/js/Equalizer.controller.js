@@ -4,6 +4,7 @@ class EqualizerController extends EqualizerModel {
   constructor() {
     super();
     this.isPlay = false;
+    this.max = [140, 140, 120, 90, 80, 60];
   }
 
   getAudioSource() {
@@ -29,7 +30,7 @@ class EqualizerController extends EqualizerModel {
   checkRate(analyzer) {
     const data = new Uint8Array(analyzer.frequencyBinCount);
     analyzer.getByteFrequencyData(data);
-    console.log(data[75]);
+    this.colorCell(data);
 
     setTimeout(() => {
       if (this.isPlay) this.checkRate(analyzer);
@@ -43,6 +44,40 @@ class EqualizerController extends EqualizerModel {
 
   handlePause() {
     this.isPlay = false;
+  }
+
+  colorCell(data) {
+    const cells = Array.from(document.querySelectorAll('.cell'));
+    const cellsArr = [];
+
+    cells.forEach((e, i) => {
+      const nestedIndex = Math.floor(i / 6);
+      e.classList.remove('active');
+
+      if (i % 6 === 0) {
+        cellsArr.push([e]);
+      } else {
+        cellsArr[nestedIndex].push(e);
+      }
+    });
+
+    const [first, second, third, fourth, fifth, sixth] = data;
+    const arr = [first, second, third, fourth, fifth, sixth];
+
+    arr.forEach((_, index) => {
+      const max = this.max[index];
+      const cellsToColor = Math.floor((data[index] / max) * 6);
+
+      for (let i = 0; i < cellsToColor; i += 1) {
+        let cellIndex = 6 - 1 - i;
+        if (cellIndex < 0) cellIndex = 0;
+
+        console.log(arr);
+        const targetCell = cellsArr[cellIndex][index];
+
+        targetCell.classList.add('active');
+      }
+    });
   }
 }
 

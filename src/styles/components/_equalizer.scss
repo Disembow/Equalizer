@@ -1,3 +1,9 @@
+.equilizer__wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .row {
   display: flex;
   flex-direction: row;
@@ -7,4 +13,8 @@
   width: 2rem;
   height: 2rem;
   border: 1px solid $main-black;
+}
+
+.active {
+  background-color: $main-green;
 }
