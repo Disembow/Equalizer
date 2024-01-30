@@ -1,7 +1,7 @@
 class EqualizerController {
   constructor() {
     this.isPlay = false;
-    this.max = [140, 140, 120, 90, 80, 60];
+    this.max = [180, 130, 150, 90, 100, 70];
   }
 
   getAudioSource() {
@@ -69,7 +69,6 @@ class EqualizerController {
         let cellIndex = 6 - 1 - i;
         if (cellIndex < 0) cellIndex = 0;
 
-        console.log(arr);
         const targetCell = cellsArr[cellIndex][index];
 
         targetCell.classList.add('active');
