@@ -1,7 +1,7 @@
 class EqualizerController {
   constructor() {
     this.isPlay = false;
-    this.max = [180, 130, 150, 90, 100, 70];
+    this.max = 255;
   }
 
   getAudioSource() {
@@ -62,8 +62,7 @@ class EqualizerController {
     const arr = [first, second, third, fourth, fifth, sixth];
 
     arr.forEach((_, index) => {
-      const max = this.max[index];
-      const cellsToColor = Math.floor((data[index] / max) * 6);
+      const cellsToColor = Math.floor((data[index] / this.max) * 6);
 
       for (let i = 0; i < cellsToColor; i += 1) {
         let cellIndex = 6 - 1 - i;
