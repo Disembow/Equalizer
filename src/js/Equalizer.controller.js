@@ -1,8 +1,5 @@
-import EqualizerModel from './Equalizer.model';
-
-class EqualizerController extends EqualizerModel {
+class EqualizerController {
   constructor() {
-    super();
     this.isPlay = false;
     this.max = [140, 140, 120, 90, 80, 60];
   }
