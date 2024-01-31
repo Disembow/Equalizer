@@ -4,7 +4,7 @@ class EqualizerController {
     this.cellsY = cellsY;
     this.isPlay = false;
     this.max = 255;
-    this.avalaibleFileExt = ['audio/mpeg', 'audio/ogg', 'audio/flac'];
+    this.avalaibleFileExt = ['audio/mpeg', 'audio/ogg', 'audio/mp4', 'audio/flac'];
   }
 
   getAudioSource() {
@@ -22,11 +22,20 @@ class EqualizerController {
     }
   }
 
+  handlePlay() {
+    this.isPlay = true;
+    this.#createEqualizer();
+  }
+
+  handlePause() {
+    this.isPlay = false;
+  }
+
   #checkFiletype(filesList) {
     return this.avalaibleFileExt.includes(filesList.type);
   }
 
-  createEqualizer() {
+  #createEqualizer() {
     const audioPlayer = document.querySelector('.audio');
 
     const audioContext = new AudioContext();
@@ -35,26 +44,17 @@ class EqualizerController {
     source.connect(analyzer);
     analyzer.connect(audioContext.destination);
 
-    if (this.isPlay) this.checkRate(analyzer);
+    if (this.isPlay) this.#checkRate(analyzer);
   }
 
-  checkRate(analyzer) {
+  #checkRate(analyzer) {
     const data = new Uint8Array(analyzer.frequencyBinCount);
     analyzer.getByteFrequencyData(data);
     this.#colorCell(data);
 
     setTimeout(() => {
-      if (this.isPlay) this.checkRate(analyzer);
+      if (this.isPlay) this.#checkRate(analyzer);
     }, 100);
-  }
-
-  handlePlay() {
-    this.isPlay = true;
-    this.createEqualizer();
-  }
-
-  handlePause() {
-    this.isPlay = false;
   }
 
   #colorCell(data) {
