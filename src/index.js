@@ -1,4 +1,5 @@
 import './style.scss';
 import Equalizer from './js/Equalizer.view';
 
-Equalizer.init();
+const equilizer = new Equalizer(16, 15);
+equilizer.init();

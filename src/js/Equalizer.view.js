@@ -2,10 +2,16 @@ import createTag from './helpers/createTag';
 import EqualizerController from './Equalizer.controller';
 
 class EqualizerView {
-  #controller = new EqualizerController();
   #root = document.getElementById('app');
-  #cellsX = 6;
-  #cellsY = 6;
+  #cellsX;
+  #cellsY;
+  #controller;
+
+  constructor(cellsX, cellsY) {
+    this.#cellsX = cellsX;
+    this.#cellsY = cellsY;
+    this.#controller = new EqualizerController(this.#cellsX, this.#cellsY);
+  }
 
   #renderGrid() {
     const wrapper = createTag('section', ['equilizer__wrapper'], this.#root);
@@ -19,18 +25,23 @@ class EqualizerView {
     }
   }
 
-  #render() {
-    this.#renderGrid();
-
-    createTag('audio', ['audio'], this.#root, {
+  #renderControls() {
+    const cells = document.querySelectorAll('.cell');
+    const audio = createTag('audio', ['audio'], this.#root, {
       controls: true,
-      onplay: () => this.#controller.handlePlay(),
-      onpause: () => this.#controller.handlePause(),
+      onplay: (e) => this.#controller.handlePlay(e, cells),
+      onpause: (e) => this.#controller.handlePause(e),
     });
+
     createTag('input', ['input'], this.#root, {
       type: 'file',
-      onchange: () => this.#controller.getAudioSource(),
+      onchange: (e) => this.#controller.getAudioSource(e, audio),
     });
+  }
+
+  #render() {
+    this.#renderGrid();
+    this.#renderControls();
   }
 
   init() {
@@ -38,4 +49,4 @@ class EqualizerView {
   }
 }
 
-export default new EqualizerView();
+export default EqualizerView;

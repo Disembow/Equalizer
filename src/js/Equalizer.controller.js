@@ -1,78 +1,112 @@
 class EqualizerController {
-  constructor() {
-    this.isPlay = false;
-    this.max = 255;
+  #cellsX;
+  #cellsY;
+  #isPlay;
+  #max;
+  #timestamp;
+  #avalaibleFileExt;
+  #cellsElements;
+  #analyzer;
+
+  constructor(cellsX, cellsY) {
+    this.#cellsX = cellsX;
+    this.#cellsY = cellsY;
+    this.#isPlay = false;
+    this.#max = 255;
+    this.#timestamp = 0;
+    this.#avalaibleFileExt = ['audio/mpeg', 'audio/ogg', 'audio/mp4', 'audio/flac'];
+    this.#cellsElements = null;
+    this.#analyzer = null;
   }
 
-  getAudioSource() {
-    const audioPlayer = document.querySelector('.audio');
-    const input = document.querySelector('.input');
+  getAudioSource({ target: input }, audioPlayer) {
+    const fileItem = input.files[0];
 
-    const audioFile = input.files[0];
-    audioPlayer.src = URL.createObjectURL(audioFile);
+    const isValidAudioType = this.#checkFiletype(fileItem);
+
+    if (isValidAudioType) {
+      const audioFile = fileItem;
+      audioPlayer.src = URL.createObjectURL(audioFile);
+    } else {
+      alert('Invalid type of file');
+    }
   }
 
-  createEqualizer() {
-    const audioPlayer = document.querySelector('.audio');
+  handlePlay({ target }, cells) {
+    this.#isPlay = true;
+    this.#cellsElements = Array.from(cells);
 
+    if (!this.#timestamp) {
+      this.#createEqualizer(target);
+    } else {
+      this.#checkRate();
+    }
+  }
+
+  handlePause({ timeStamp }) {
+    if (!!timeStamp) this.#isPlay = false;
+
+    this.#timestamp = timeStamp;
+  }
+
+  #checkFiletype(filesList) {
+    return this.#avalaibleFileExt.includes(filesList.type);
+  }
+
+  #createEqualizer(audioPlayer) {
     const audioContext = new AudioContext();
     const analyzer = audioContext.createAnalyser();
     const source = audioContext.createMediaElementSource(audioPlayer);
     source.connect(analyzer);
     analyzer.connect(audioContext.destination);
+    this.#analyzer = analyzer;
 
-    if (this.isPlay) this.checkRate(analyzer);
+    if (this.#isPlay) this.#checkRate();
   }
 
-  checkRate(analyzer) {
-    const data = new Uint8Array(analyzer.frequencyBinCount);
-    analyzer.getByteFrequencyData(data);
-    this.colorCell(data);
+  #checkRate() {
+    const data = new Uint8Array(this.#analyzer.frequencyBinCount);
+    this.#analyzer.getByteFrequencyData(data);
+    this.#colorCell(data);
 
-    setTimeout(() => {
-      if (this.isPlay) this.checkRate(analyzer);
-    }, 100);
+    if (this.#isPlay) {
+      setTimeout(() => {
+        this.#checkRate(this.#analyzer);
+      }, 50);
+    }
   }
 
-  handlePlay() {
-    this.isPlay = true;
-    this.createEqualizer();
-  }
+  #colorCell(data) {
+    const cellsNestedArr = this.#createNestedCellsGrid(this.#cellsElements);
 
-  handlePause() {
-    this.isPlay = false;
-  }
-
-  colorCell(data) {
-    const cells = Array.from(document.querySelectorAll('.cell'));
-    const cellsArr = [];
-
-    cells.forEach((e, i) => {
-      const nestedIndex = Math.floor(i / 6);
-      e.classList.remove('active');
-
-      if (i % 6 === 0) {
-        cellsArr.push([e]);
-      } else {
-        cellsArr[nestedIndex].push(e);
-      }
-    });
-
-    const [first, second, third, fourth, fifth, sixth] = data;
-    const arr = [first, second, third, fourth, fifth, sixth];
-
-    arr.forEach((_, index) => {
-      const cellsToColor = Math.floor((data[index] / this.max) * 6);
+    const frequencyData = data.slice(0, this.#cellsX);
+    frequencyData.forEach((_, index) => {
+      const cellsToColor = Math.floor((frequencyData[index] / this.#max) * this.#cellsY);
 
       for (let i = 0; i < cellsToColor; i += 1) {
-        let cellIndex = 6 - 1 - i;
-        if (cellIndex < 0) cellIndex = 0;
+        let cellIndex = this.#cellsY - 1 - i;
 
-        const targetCell = cellsArr[cellIndex][index];
-
+        const targetCell = cellsNestedArr[cellIndex][index];
         targetCell.classList.add('active');
       }
     });
+  }
+
+  #createNestedCellsGrid(cells) {
+    const nestedCells = [];
+
+    cells.forEach((cell, i) => {
+      const nestedIndex = Math.floor(i / this.#cellsX);
+      cell.classList.remove('active');
+
+      if (i % this.#cellsX === 0) {
+        nestedCells.push([cell]);
+      } else {
+        nestedCells[nestedIndex].push(cell);
+      }
+    });
+
+    return nestedCells;
   }
 }
 
