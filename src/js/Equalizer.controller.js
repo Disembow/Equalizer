@@ -32,6 +32,8 @@ class EqualizerController {
   }
 
   #checkFiletype(filesList) {
+    console.log(filesList.type);
+
     return this.avalaibleFileExt.includes(filesList.type);
   }
 
