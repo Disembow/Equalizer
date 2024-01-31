@@ -4,15 +4,26 @@ class EqualizerController {
     this.cellsY = cellsY;
     this.isPlay = false;
     this.max = 255;
+    this.avalaibleFileExt = ['audio/mpeg', 'audio/ogg', 'audio/flac'];
   }
 
   getAudioSource() {
     const audioPlayer = document.querySelector('.audio');
     const input = document.querySelector('.input');
-    console.log(input.files);
+    const fileItem = input.files[0];
 
-    const audioFile = input.files[0];
-    audioPlayer.src = URL.createObjectURL(audioFile);
+    const isValidAudioType = this.#checkFiletype(fileItem);
+
+    if (isValidAudioType) {
+      const audioFile = fileItem;
+      audioPlayer.src = URL.createObjectURL(audioFile);
+    } else {
+      alert('Invalid type of file');
+    }
+  }
+
+  #checkFiletype(filesList) {
+    return this.avalaibleFileExt.includes(filesList.type);
   }
 
   createEqualizer() {
