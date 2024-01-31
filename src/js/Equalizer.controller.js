@@ -4,6 +4,7 @@ class EqualizerController {
     this.cellsY = cellsY;
     this.isPlay = false;
     this.max = 255;
+    this.timestamp = 0;
     this.avalaibleFileExt = ['audio/mpeg', 'audio/ogg', 'audio/mp4', 'audio/flac'];
   }
 
@@ -22,24 +23,22 @@ class EqualizerController {
     }
   }
 
-  handlePlay() {
+  handlePlay({ target }) {
     this.isPlay = true;
-    this.#createEqualizer();
+    if (!this.timestamp) this.#createEqualizer(target);
   }
 
-  handlePause() {
-    this.isPlay = false;
+  handlePause({ timeStamp }) {
+    if (!timeStamp) this.isPlay = false;
+
+    this.timestamp = timeStamp;
   }
 
   #checkFiletype(filesList) {
-    console.log(filesList.type);
-
     return this.avalaibleFileExt.includes(filesList.type);
   }
 
-  #createEqualizer() {
-    const audioPlayer = document.querySelector('.audio');
-
+  #createEqualizer(audioPlayer) {
     const audioContext = new AudioContext();
     const analyzer = audioContext.createAnalyser();
     const source = audioContext.createMediaElementSource(audioPlayer);
@@ -61,30 +60,27 @@ class EqualizerController {
 
   #colorCell(data) {
     const cellsElements = Array.from(document.querySelectorAll('.cell'));
-    const cellsArr = [];
+    const cellsNestedArr = [];
 
     cellsElements.forEach((cell, i) => {
       const nestedIndex = Math.floor(i / this.cellsX);
       cell.classList.remove('active');
 
       if (i % this.cellsX === 0) {
-        cellsArr.push([cell]);
+        cellsNestedArr.push([cell]);
       } else {
-        cellsArr[nestedIndex].push(cell);
+        cellsNestedArr[nestedIndex].push(cell);
       }
     });
 
     const frequencyData = data.slice(0, this.cellsX);
     frequencyData.forEach((_, index) => {
-      const cellsToColor = Math.floor((data[index] / this.max) * this.cellsY);
+      const cellsToColor = Math.floor((frequencyData[index] / this.max) * this.cellsY);
 
       for (let i = 0; i < cellsToColor; i += 1) {
         let cellIndex = this.cellsY - 1 - i;
 
-        if (cellIndex < 0) cellIndex = 0;
-
-        const targetCell = cellsArr[cellIndex][index];
-
+        const targetCell = cellsNestedArr[cellIndex][index];
         targetCell.classList.add('active');
       }
     });
