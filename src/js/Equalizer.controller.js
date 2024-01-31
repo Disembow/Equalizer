@@ -1,5 +1,7 @@
 class EqualizerController {
-  constructor() {
+  constructor(cellsX, cellsY) {
+    this.cellsX = cellsX;
+    this.cellsY = cellsY;
     this.isPlay = false;
     this.max = 255;
   }
@@ -7,6 +9,7 @@ class EqualizerController {
   getAudioSource() {
     const audioPlayer = document.querySelector('.audio');
     const input = document.querySelector('.input');
+    console.log(input.files);
 
     const audioFile = input.files[0];
     audioPlayer.src = URL.createObjectURL(audioFile);
@@ -27,7 +30,7 @@ class EqualizerController {
   checkRate(analyzer) {
     const data = new Uint8Array(analyzer.frequencyBinCount);
     analyzer.getByteFrequencyData(data);
-    this.colorCell(data);
+    this.#colorCell(data);
 
     setTimeout(() => {
       if (this.isPlay) this.checkRate(analyzer);
@@ -43,29 +46,28 @@ class EqualizerController {
     this.isPlay = false;
   }
 
-  colorCell(data) {
-    const cells = Array.from(document.querySelectorAll('.cell'));
+  #colorCell(data) {
+    const cellsElements = Array.from(document.querySelectorAll('.cell'));
     const cellsArr = [];
 
-    cells.forEach((e, i) => {
-      const nestedIndex = Math.floor(i / 6);
-      e.classList.remove('active');
+    cellsElements.forEach((cell, i) => {
+      const nestedIndex = Math.floor(i / this.cellsX);
+      cell.classList.remove('active');
 
-      if (i % 6 === 0) {
-        cellsArr.push([e]);
+      if (i % this.cellsX === 0) {
+        cellsArr.push([cell]);
       } else {
-        cellsArr[nestedIndex].push(e);
+        cellsArr[nestedIndex].push(cell);
       }
     });
 
-    const [first, second, third, fourth, fifth, sixth] = data;
-    const arr = [first, second, third, fourth, fifth, sixth];
-
-    arr.forEach((_, index) => {
-      const cellsToColor = Math.floor((data[index] / this.max) * 6);
+    const frequencyData = data.slice(0, this.cellsX);
+    frequencyData.forEach((_, index) => {
+      const cellsToColor = Math.floor((data[index] / this.max) * this.cellsY);
 
       for (let i = 0; i < cellsToColor; i += 1) {
-        let cellIndex = 6 - 1 - i;
+        let cellIndex = this.cellsY - 1 - i;
+
         if (cellIndex < 0) cellIndex = 0;
 
         const targetCell = cellsArr[cellIndex][index];
